@@ -1,7 +1,8 @@
 ascertain
 =========
+[![Build Status](https://travis-ci.org/mike-php-net/ascertain.png?branch=master)](https://travis-ci.org/mike-php-net/ascertain)
 
-Harmless validation. [![Build Status](https://api.travis-ci.org/mike-php-net/ascertain.png)](https://travis-ci.org/mike-php-net/ascertain)
+Harmless validation.
 
 ```php
 $user->assert()
