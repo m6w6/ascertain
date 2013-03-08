@@ -1,7 +1,7 @@
 ascertain
 =========
 
-Harmless validation.
+Harmless validation. [![Build Status](https://api.travis-ci.org/mike-php-net/ascertain.png)](https://travis-ci.org/mike-php-net/ascertain)
 
 ```php
 $user->assert()
