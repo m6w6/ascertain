@@ -155,7 +155,7 @@ class Assert
 	 * @return bool
 	 */
 	function testPrintable(&$r, $v) {
-		return preg_match("/^[[:print:]\\P{Cc}]*\$/u", $v, $r);
+		return preg_match("/^[[:print:]\\P{Cc}]*\$/u", $v, $r) > 0;
 	}
 	
 	/**
@@ -166,7 +166,7 @@ class Assert
 	 * @param int $max
 	 * @return bool
 	 */
-	function testLen(&$r, $v, $min, $max) {
+	function testLen(&$r, $v, $min, $max = PHP_INT_MAX) {
 		return $this->testRange($r, function_exists("mb_strlen") ? mb_strlen($v) : strlen($v), $min, $max);
 	}
 	
@@ -179,7 +179,7 @@ class Assert
 	 * @return bool
 	 */
 	function testRange(&$r, $v, $min, $max) {
-		$r = $v >= $min && $v <= $max;
+		$r = (($v >= $min) && ($v <= $max));
 		return $r;
 	}
 
@@ -221,18 +221,6 @@ class Assert
 	}
 	
 	/**
-	 * Test for a valid regular expression with FILTER_VALIDATE_REGEXP
-	 * @param mixed &$r
-	 * @param string $v
-	 * @param array $options
-	 * @return bool
-	 */
-	function testRegexp(&$r, $v, array $options = null) {
-		$r = filter_var($v, FILTER_VALIDATE_REGEXP, $options);
-		return $r !== false;
-	}
-
-	/**
 	 * Test for a valid URL with FILTER_VALIDATE_URL
 	 * @param mixed &$r
 	 * @param string $v
@@ -269,14 +257,14 @@ class Assert
 	}
 
 	/**
-	 * Test whether a string contains another string
+	 * Test whether a string contains another string or an array contains a key
 	 * @param mixed &$r
-	 * @param type $v haystack
-	 * @param type $n needle
+	 * @param mixed $v haystack
+	 * @param string $n needle
 	 * @param bool $cs case-sensitive
 	 * @return bool
 	 */
-	function testContains(&$r, $v, $n, $cs = true) {
+	function testContaining(&$r, $v, $n, $cs = true) {
 		if (is_array($v)) {
 			if (!$cs) {
 				$v = array_change_key_case($v);
@@ -289,12 +277,24 @@ class Assert
 			return $r = false;
 		} else {
 			if ($cs) {
-				$r = strstr($v, $n);
+				$r = strstr($v, (string) $n);
 			} else {
-				$r = stristr($v, $n);
+				$r = stristr($v, (string) $n);
 			}
 			return $r !== false;
 		}
+	}
+	
+	/**
+	 * Thest 
+	 * @param mixed &$r
+	 * @param mixed $v
+	 * @param array $a
+	 * @param bool $strict
+	 * @return bool
+	 */
+	function testAny(&$r, $v, $a, $strict = false) {
+		return $r = in_array($v, $a, $strict);
 	}
 	
 	/**
@@ -318,7 +318,7 @@ class Assert
 	 */
 	function __call($method, $args) {
 		$match = null;
-		if ($this->inspectCondition && preg_match("/^is(Not)?(.*)\$/i", $method, $match)) {
+		if ($this->inspectCondition && preg_match("/^is(Not(?!hing))?(.*)\$/i", $method, $match)) {
 			list(, $not, $test) = $match;
 			
 			$result = null;
@@ -326,13 +326,14 @@ class Assert
 			array_unshift($args, $this->properties[$this->inspectedProperty]);
 			array_unshift($args, null);
 			$args[0] = &$result;
-			if (call_user_func_array(array($this, "test$test"), $args) === !!$not) {
-				$this->validationResults[$this->inspectedProperty][] = $args[0];
+			$valid = call_user_func_array(array($this, "test$test"), $args);
+			if ($valid === !!$not) {
 				$this->validationErrors[$this->inspectedProperty][] = $error;
 				if (($exception = $this->exceptionClass)) {
 					throw new $exception("$this->inspectedProperty $error");
 				}
 			}
+			$this->validationResults[$this->inspectedProperty][] = $args[0];
 		}
 		return $this;
 	}
