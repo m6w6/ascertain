@@ -1,9 +1,9 @@
 {
-    "name": "mike_php_net/ascertain",
+    "name": "m6w6/ascertain",
     "type": "library",
     "description": "Simple validator, not doing much harm",
     "keywords": ["validator"],
-    "homepage": "http://github.com/mike-php-net/ascertain",
+    "homepage": "http://github.com/m6w6/ascertain",
     "license": "BSD-2-Clause",
     "authors": [
         {
